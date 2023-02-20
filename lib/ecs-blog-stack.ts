@@ -3,6 +3,7 @@ import {Construct} from 'constructs';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as ecs from 'aws-cdk-lib/aws-ecs';
 import * as elb from 'aws-cdk-lib/aws-elasticloadbalancingv2';
+import * as iam from 'aws-cdk-lib/aws-iam';
 
 export class EcsBlogStack extends cdk.Stack {
     constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -12,12 +13,16 @@ export class EcsBlogStack extends cdk.Stack {
 
         // Create a cluster
         const cluster = new ecs.Cluster(this, 'EcsCluster', {vpc});
-        cluster.addCapacity('DefaultAutoScalingGroup', {
-            instanceType: ec2.InstanceType.of(ec2.InstanceClass.T2, ec2.InstanceSize.MICRO)
-        });
 
         // Create Task Definition
-        const taskDefinition = new ecs.FargateTaskDefinition(this, 'TaskDef');
+        const taskDefinition = new ecs.FargateTaskDefinition(this, 'TaskDef', {
+            executionRole: new iam.Role(this, 'ExecutionRole', {
+                assumedBy: new iam.ServicePrincipal('ecs-tasks.amazonaws.com'),
+                managedPolicies: [
+                    iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AmazonECSTaskExecutionRolePolicy')
+                ]
+            }),
+        });
         const container = taskDefinition.addContainer('web', {
             image: ecs.ContainerImage.fromRegistry("691490147357.dkr.ecr.us-east-1.amazonaws.com/ecs-blog:latest"),
             memoryLimitMiB: 512,
@@ -25,7 +30,7 @@ export class EcsBlogStack extends cdk.Stack {
 
         container.addPortMappings({
             containerPort: 80,
-            hostPort: 8080,
+            hostPort: 80,
             protocol: ecs.Protocol.TCP
         });
 
