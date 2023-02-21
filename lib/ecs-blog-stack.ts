@@ -9,7 +9,7 @@ export class EcsBlogStack extends cdk.Stack {
     constructor(scope: Construct, id: string, props?: cdk.StackProps) {
         super(scope, id, props);
 
-        const vpc = new ec2.Vpc(this, 'Vpc', {maxAzs: 2});
+        const vpc = new ec2.Vpc(this, 'Vpc');
 
         // Create a cluster
         const cluster = new ecs.Cluster(this, 'EcsCluster', {vpc});
@@ -24,13 +24,12 @@ export class EcsBlogStack extends cdk.Stack {
             }),
         });
         const container = taskDefinition.addContainer('web', {
-            image: ecs.ContainerImage.fromRegistry("691490147357.dkr.ecr.us-east-1.amazonaws.com/ecs-blog:latest"),
+            image: ecs.ContainerImage.fromRegistry("ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/ecs-blog:latest"),
             memoryLimitMiB: 512,
         });
 
         container.addPortMappings({
             containerPort: 80,
-            hostPort: 80,
             protocol: ecs.Protocol.TCP
         });
 
