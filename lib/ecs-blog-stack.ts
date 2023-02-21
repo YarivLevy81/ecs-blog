@@ -30,6 +30,7 @@ export class EcsBlogStack extends cdk.Stack {
 
         container.addPortMappings({
             containerPort: 80,
+            hostPort: 80,
             protocol: ecs.Protocol.TCP
         });
 
