@@ -24,7 +24,7 @@ export class EcsBlogStack extends cdk.Stack {
             }),
         });
         const container = taskDefinition.addContainer('web', {
-            image: ecs.ContainerImage.fromRegistry("ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/ecs-blog:latest"),
+            image: ecs.ContainerImage.fromRegistry("691490147357.dkr.ecr.us-east-1.amazonaws.com/my-app:latest"),
             memoryLimitMiB: 512,
         });
 
@@ -38,6 +38,9 @@ export class EcsBlogStack extends cdk.Stack {
         const service = new ecs.FargateService(this, "Service", {
             cluster,
             taskDefinition,
+            vpcSubnets: {
+                availabilityZones: ['us-east-1a']
+            }
         });
 
         // Create ALB
